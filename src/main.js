@@ -25,7 +25,7 @@ import store from "./store";
 //   TooltipComponent
 // ]);
 
-// 全局注册组件（也可以使用局部注册）
+// // 全局注册组件（也可以使用局部注册）
 // Vue.component('v-chart', ECharts)
 
 // 整个引入
