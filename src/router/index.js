@@ -37,7 +37,7 @@ const routes = [
   {
     path: "/test3",
     name: "Test3",
-    component: () => import("../views/Test3.vue"),
+    component: () => import("../views/topo/index.vue"),
   },
 ];
 

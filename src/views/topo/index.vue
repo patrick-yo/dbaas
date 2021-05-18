@@ -1,10 +1,20 @@
 <template>
-  <v-chart class="chart" :option="option" :auto-resize="true" />
+  <div>
+    <el-container>
+      <el-col :span="2">
+        <el-button @click="drawer = true">编辑</el-button>
+      </el-col>
+      <el-col>
+        <v-chart class="chart" :option="option" :auto-resize="true" />
+      </el-col>
+    </el-container>
+    <el-draw></el-draw>
+  </div>
 </template>
 
 <script>
 import VChart from "vue-echarts";
-import { modelList, edgeList } from "./data/model";
+import { modelList, edgeList } from "./model";
 
 export default {
   components: {
@@ -12,6 +22,7 @@ export default {
   },
   data() {
     return {
+      drawer: false,
       option: {
         title: {
           text: "拓扑示例",
@@ -47,51 +58,9 @@ export default {
             },
             data: [],
             links: [],
-            // links: [
-            //   {
-            //     source: 0, // 可以用数字索引节点
-            //     target: 1,
-            //     // symbolSize: [5, 20],
-            //     // label: {
-            //     //   show: true,  // 显示标签
-            //     // },
-            //     lineStyle: {
-            //       // width: 5,
-            //       curveness: 0.2, // 线的弯曲程度
-            //     },
-            //   },
-            //   {
-            //     source: "X86物理设备",
-            //     target: "主机",
-            //     label: {
-            //       show: true,
-            //     },
-            //     lineStyle: {
-            //       curveness: 0,
-            //     },
-            //   },
-            //   {
-            //     source: "主机",
-            //     target: "IP地址",
-            //   },
-            //   {
-            //     source: "X86物理设备",
-            //     target: "IP地址",
-            //   },
-            //   {
-            //     source: "X86物理设备",
-            //     target: "物理数据库",
-            //   },
-            //   {
-            //     source: "主机",
-            //     target: "物理数据库",
-            //   },
-            // ],
             lineStyle: {
               opacity: 0.9,
               width: 1,
-              curveness: 0,
-              symbolSize: [5, 20],
             },
           },
         ],
@@ -138,9 +107,7 @@ export default {
       // console.log("classJson---,", classJson)
       // console.log("levelJson----,", levelJson)
 
-      // 初始化坐标矩阵区域(area)，(class+column)和level组成的矩阵
-      // var classList = ["infra", "storage", "security", "network", "system", "db", "product"]
-      // var levelList = ["app", "service", "os", "virtual", "physical"]
+      // 以[(class+column) x level]初始化矩阵区域(area)
       var areaJson = {};
       for (const levelItem of levelScaleList) {
         for (const classItem of classScaleList) {
@@ -158,8 +125,8 @@ export default {
         // 模型(model)基础信息
         var json = {
           name: model.name,
-          // symbol: "rect",
-          symbolSize: [50, 42],
+          // symbol: "rect",  // (长)方形模块会导致连线错位，待解决
+          symbolSize: [45, 38],
           label: {
             fontSize: 9,
           },
@@ -205,5 +172,12 @@ export default {
 <style scoped>
 .chart {
   height: 100vh;
+}
+
+.el-aside {
+  background-color: #D3DCE6;
+  color: #333;
+  /* text-align: center; */
+  line-height: 200px;
 }
 </style>

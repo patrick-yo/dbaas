@@ -103,13 +103,13 @@ const edgeList = [
 
   { source: "项目信息", target: "制品" },
 
-  { source: "发布单元", target: "制品" },
+  { source: "发布单元", target: "制品", lineStyle: { curveness: 0.1 } },
 
   { source: "RS6000物理设备", target: "OS主机", lineStyle: { curveness: -0.05 } },
   { source: "RS6000物理设备", target: "RS6000LPAR" },
   { source: "RS6000LPAR", target: "OS主机" },
 
-  { source: "SAN交换机", target: "OS主机" },
+  { source: "SAN交换机", target: "OS主机", lineStyle: { curveness: 0.33 } },
 
   { source: "安全设备", target: "OS主机", lineStyle: { curveness: 0.9 } },
 
@@ -124,7 +124,7 @@ const edgeList = [
   { source: "存储LUN", target: "OS主机" },
   { source: "存储LUN", target: "存储设备", lineStyle: { curveness: -0.7 } },
 
-  { source: "系统/子系统", target: "OS主机" },
+  { source: "系统/子系统", target: "OS主机", lineStyle: { curveness: 0.1 } },
   { source: "系统/子系统", target: "发布单元" },
   { source: "系统/子系统", target: "服务单元", lineStyle: { curveness: -0.1 } },
 
