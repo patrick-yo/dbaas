@@ -2,19 +2,64 @@
   <div>
     <el-container>
       <el-col :span="2">
-        <el-button @click="drawer = true">编辑</el-button>
+        <div v-if="buttonVisible == true">
+          <el-button-group style="margin-top: 40px">
+              <el-button 
+              @click="drawer = true" 
+              size="small" 
+              type="primary" 
+              icon="el-icon-plus"
+              />
+              <el-button 
+              @click="deleteModel" 
+              size="small" 
+              type="info" 
+              icon="el-icon-delete"
+              />
+          </el-button-group>
+        </div>
+        <div v-else>
+          <el-button-group style="margin-top: 40px">
+            <el-button
+            @click="deleteSave"
+            size="small" 
+            type="primary"
+            icon="el-icon-check">保存</el-button>
+          </el-button-group>
+        </div>
       </el-col>
       <el-col>
-        <v-chart class="chart" :option="option" :auto-resize="true" />
+        <v-chart class="chart" :option="option" :auto-resize="true" @click="vChartClickEvent" />
       </el-col>
     </el-container>
-    <el-draw></el-draw>
+    <el-drawer
+      title="添加模型"
+      size="20%"
+      :visible.sync="drawer"
+      direction="ltr">
+      <el-row :gutter="0">
+        <el-col :span="15">
+          <el-autocomplete 
+          style="margin-left: 20px"
+          :fetch-suggestions="querySearch" 
+          v-model="input" 
+          placeholder="请输入内容" 
+          size="mini" 
+          @select="handleSelect"
+          clearable />
+        </el-col>
+        <el-col :span="9">
+          <el-button @click="addModel" size="mini" type="warning">添加
+          </el-button>
+        </el-col>
+      </el-row>
+    </el-drawer>
   </div>
 </template>
 
 <script>
 import VChart from "vue-echarts";
-import { modelList, edgeList } from "./model";
+import { modelList, edgeList, otherModelList } from "./model";
 
 export default {
   components: {
@@ -22,7 +67,12 @@ export default {
   },
   data() {
     return {
+      buttonVisible: true,
+      input: "",
       drawer: false,
+      deleteMode: false,
+      restaurants: otherModelList,
+      selectedItem: {},
       option: {
         title: {
           text: "拓扑示例",
@@ -68,8 +118,73 @@ export default {
     };
   },
   methods: {
+    deleteModel() {
+      this.deleteMode = true
+      this.buttonVisible = false
+      this.option.title.text = "删除模式(点击模型即可删除)"
+    },
+    deleteSave() {
+      this.deleteMode = false
+      this.buttonVisible = true
+      this.option.title.text = "拓扑示例"
+
+      const h = this.$createElement;
+      this.$notify({
+        title: '提示',
+        message: h('i', { style: 'color: teal'}, '已保存'),
+        type: 'success'
+      });
+    },
+
+    vChartClickEvent(e) {
+      if (this.deleteMode) {
+        for (const modelItem of modelList) {
+          if (modelItem.value == e.data.name) {
+            var indexItem = modelList.indexOf(modelItem)
+            var deletedModel = modelItem
+            break
+          }
+        }
+        modelList.splice(indexItem, 1)
+        console.log("deletedModel---,", deletedModel)
+        this.restaurants.push(deletedModel)
+        this.getBasicGraph()
+      }
+    },
+
+    addModel() {
+      modelList.push(this.selectedItem)
+      const h = this.$createElement;
+      this.$notify({
+        title: '提示',
+        message: h('i', { style: 'color: teal'}, '添加成功'),
+        type: 'success'
+      });
+      this.getBasicGraph()
+    },
+
+    querySearch(queryString, cb) {
+      console.log("queryString---,", queryString)
+      var restaurants = this.restaurants;
+      var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants;
+      // console.log("restaurants---,", restaurants)
+      // console.log("results---,", results)
+      // 调用 callback 返回建议列表的数据
+      cb(results);
+    },
+    createFilter(queryString) {
+      return (restaurant) => {
+        return (restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+      };
+    },
+    handleSelect(item) {
+      this.selectedItem = item
+      console.log("this.selectedItem------,", this.selectedItem);
+    },
+
     getBasicGraph() {
-      console.log(edgeList);
+      this.option.series[0].data = []
+      // console.log(edgeList);
       let columnInterval = 350,
         rowInterval = 200; // x, y坐标的interval
 
@@ -124,7 +239,7 @@ export default {
       for (const model of modelList) {
         // 模型(model)基础信息
         var json = {
-          name: model.name,
+          name: model.value,
           // symbol: "rect",  // (长)方形模块会导致连线错位，待解决
           symbolSize: [45, 38],
           label: {
@@ -139,7 +254,7 @@ export default {
           model.level + "_" + model.class + "_" + model.column;
         for (const key in areaJson) {
           if (modelAreaName == key) {
-            areaJson[key].push(model.name);
+            areaJson[key].push(model.value);
             var areaLength = areaJson[key].length; // 判断坐标区域内有无别的model
           }
         }
@@ -157,6 +272,8 @@ export default {
       }
       this.option.series[0].data = cmdbModel;
 
+      // 关系线
+      this.option.series[0].links = []
       for (const edgeJson of edgeList) {
         edgeJson["symbolSize"] = [1, 5];
         this.option.series[0].links.push(edgeJson);

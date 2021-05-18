@@ -1,49 +1,56 @@
 // level代表水平分层(physical/virtual/os/service/app)
 // class代表垂直分类(infra/storage/security/network/system/db/product)
 // column代表放在同class内的第n列，默认1
-const modelList = [
+var modelList = [
   // system
-  { name: "OS主机", level: "os", class: "system" },
-  { name: "X86虚拟机", level: "virtual", class: "system" },
-  { name: "X86物理机", level: "physical", class: "system" },
-  { name: "RS6000物理设备", level: "physical", class: "system", column: 2 },
-  { name: "RS6000LPAR", level: "virtual", class: "system", column: 2 },
-  { name: "ACS物理机", level: "physical", class: "system", column: 3 },
-  { name: "ACS虚拟机", level: "virtual", class: "system", column: 3 },
-  { name: "DockerApp", level: "service", class: "system" },
-  { name: "服务单元", level: "service", class: "system" },
-  { name: "发布单元", level: "service", class: "system" },
-  { name: "进程端口", level: "service", class: "system", column: 2 },
-  { name: "中间件实例", level: "service", class: "system", column: 3 },
-  { name: "系统/子系统", level: "service", class: "system", column: 4 },
+  { value: "OS主机", level: "os", class: "system" },
+  { value: "X86虚拟机", level: "virtual", class: "system" },
+  { value: "X86物理机", level: "physical", class: "system" },
+  { value: "RS6000物理设备", level: "physical", class: "system", column: 2 },
+  { value: "RS6000LPAR", level: "virtual", class: "system", column: 2 },
+  { value: "ACS物理机", level: "physical", class: "system", column: 3 },
+  { value: "ACS虚拟机", level: "virtual", class: "system", column: 3 },
+  { value: "DockerApp", level: "service", class: "system" },
+  { value: "服务单元", level: "service", class: "system" },
+  { value: "发布单元", level: "service", class: "system" },
+  { value: "进程端口", level: "service", class: "system", column: 2 },
+  { value: "中间件实例", level: "service", class: "system", column: 3 },
+  { value: "系统/子系统", level: "service", class: "system", column: 4 },
   // security
-  { name: "安全设备", level: "physical", class: "security" },
-  { name: "安全室F5LTM", level: "virtual", class: "security" },
+  { value: "安全设备", level: "physical", class: "security" },
+  { value: "安全室F5LTM", level: "virtual", class: "security" },
   // storage
-  { name: "存储设备", level: "physical", class: "storage" },
-  { name: "SAN交换机", level: "physical", class: "storage" },
-  { name: "存储LUN", level: "virtual", class: "storage" },
+  { value: "存储设备", level: "physical", class: "storage" },
+  { value: "SAN交换机", level: "physical", class: "storage" },
+  { value: "存储LUN", level: "virtual", class: "storage" },
   // db
-  { name: "物理数据库", level: "service", class: "db" },
-  { name: "虚拟数据库", level: "service", class: "db" },
+  { value: "物理数据库", level: "service", class: "db" },
+  { value: "虚拟数据库", level: "service", class: "db" },
   // network
-  { name: "网络设备", level: "physical", class: "network" },
-  { name: "F5设备", level: "physical", class: "network" },
-  { name: "IP地址", level: "virtual", class: "network" },
-  { name: "IP网段", level: "virtual", class: "network", column: 2 },
-  { name: "网络室F5LTM", level: "virtual", class: "network" },
-  { name: "VIP地址", level: "virtual", class: "network" },
-  { name: "域名", level: "service", class: "network" },
+  { value: "网络设备", level: "physical", class: "network" },
+  { value: "F5设备", level: "physical", class: "network" },
+  { value: "IP地址", level: "virtual", class: "network" },
+  { value: "IP网段", level: "virtual", class: "network", column: 2 },
+  { value: "网络室F5LTM", level: "virtual", class: "network" },
+  { value: "VIP地址", level: "virtual", class: "network" },
+  { value: "域名", level: "service", class: "network" },
   // infra
-  { name: "机房设施", level: "physical", class: "infra" },
-  { name: "实物资产管理", level: "virtual", class: "infra"},
+  { value: "机房设施", level: "physical", class: "infra" },
+  { value: "实物资产管理", level: "virtual", class: "infra"},
 
   // product
-  { name: "制品", level: "app", class: "product" },
-  { name: "项目信息", level: "service", class: "product"},
+  { value: "制品", level: "app", class: "product" },
+  { value: "项目信息", level: "service", class: "product"},
 
 
 ];
+
+const otherModelList = [
+  { value: "防火墙策略", level: "service", class: "network" },
+  { value: "域名映射", level: "service", class: "network" },
+  { value: "DockerPod", level: "service", class: "system", column: 2 },
+  { value: "Docker产品", level: "app", class: "system" },
+]
 
 const edgeList = [
   { source: "ACS虚拟机", target: "ACS物理机" },
@@ -133,7 +140,12 @@ const edgeList = [
   { source: "X86物理机", target: "OS主机", lineStyle: { curveness: -0.25 } },
   { source: "X86物理机", target: "X86虚拟机" },
   { source: "X86虚拟机", target: "OS主机" },
+
+  // 追加
+  { source: "安全设备", target: "防火墙策略" },
+  { source: "域名映射", target: "VIP地址", lineStyle: { curveness: -0.4 } },
+
 ];
 // console.log(edgeList)
 
-export { modelList, edgeList };
+export { modelList, edgeList, otherModelList };
