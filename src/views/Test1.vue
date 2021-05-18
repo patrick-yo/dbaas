@@ -6,29 +6,22 @@
 import VChart from "vue-echarts";
 export default {
   components: {
-    VChart
+    VChart,
   },
   data() {
     return {
       option: {
         title: {
           text: "Topo Demo",
-
         },
         tooltip: {
           trigger: "item",
-          formatter: "{a} <br/>{b} : {c} ({d}%)"
+          formatter: "{a} <br/>{b} : {c} ({d}%)",
         },
         legend: {
           // orient: "vertical",
           // left: "left",
-          data: [
-            "Peter",
-            "Anne",
-            "Sue",
-            "Ken",
-            "Tim"
-          ]
+          data: ["Peter", "Anne", "Sue", "Ken", "Tim"],
         },
         series: [
           {
@@ -37,11 +30,11 @@ export default {
             radius: "55%",
             center: ["50%", "60%"],
             data: [
-              {name: "Peter", value: 3211},
-              {name: "Anne", value: 1200},
-              {name: "Sue", value: 741},
-              {name: "Ken", value: 7228},
-              {name: "Tim", value: 900},
+              { name: "Peter", value: 3211 },
+              { name: "Anne", value: 1200 },
+              { name: "Sue", value: 741 },
+              { name: "Ken", value: 7228 },
+              { name: "Tim", value: 900 },
             ],
             emphasis: {
               scaleSize: 15,
@@ -49,14 +42,14 @@ export default {
                 shadowBlur: 10,
                 shadowOffsetX: 0,
                 // shadowColor: "rgba(0, 0, 0, 0.5)"
-              }
-            }
-          }
-        ]
-      }
-    }
-  }
-}
+              },
+            },
+          },
+        ],
+      },
+    };
+  },
+};
 </script>
 
 <style scoped>
