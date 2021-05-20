@@ -37,7 +37,6 @@ var modelList = [
   // infra
   { value: "机房设施", level: "physical", class: "infra" },
   { value: "实物资产管理", level: "virtual", class: "infra"},
-
   // product
   { value: "制品", level: "app", class: "product" },
   { value: "项目信息", level: "service", class: "product"},
@@ -45,7 +44,7 @@ var modelList = [
 
 ];
 
-const otherModelList = [
+const subModelList = [
   { value: "防火墙策略", level: "service", class: "network" },
   { value: "域名映射", level: "service", class: "network" },
   { value: "DockerPod", level: "service", class: "system", column: 2 },
@@ -146,6 +145,5 @@ const edgeList = [
   { source: "域名映射", target: "VIP地址", lineStyle: { curveness: -0.4 } },
 
 ];
-// console.log(edgeList)
 
-export { modelList, edgeList, otherModelList };
+export { modelList, edgeList, subModelList };

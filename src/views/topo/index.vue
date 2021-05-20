@@ -1,9 +1,10 @@
 <template>
   <div>
     <el-container>
-      <el-col :span="2">
+      <!-- <el-col :span="2"> -->
+      <el-col :span=2>
         <div v-if="buttonVisible == true">
-          <el-button-group style="margin-top: 40px">
+          <el-button-group style="margin-top: 30px">
               <el-button 
               @click="drawer = true" 
               size="small" 
@@ -28,6 +29,7 @@
           </el-button-group>
         </div>
       </el-col>
+      <!-- </el-col> -->
       <el-col>
         <v-chart class="chart" :option="option" :auto-resize="true" @click="vChartClickEvent" />
       </el-col>
@@ -49,7 +51,7 @@
           clearable />
         </el-col>
         <el-col :span="9">
-          <el-button @click="addModel" size="mini" type="warning">添加
+          <el-button @click="addModelButtonEvent" size="mini" type="warning">添加
           </el-button>
         </el-col>
       </el-row>
@@ -59,7 +61,7 @@
 
 <script>
 import VChart from "vue-echarts";
-import { modelList, edgeList, otherModelList } from "./model";
+import { modelList, edgeList, subModelList } from "./model";
 
 export default {
   components: {
@@ -71,7 +73,8 @@ export default {
       input: "",
       drawer: false,
       deleteMode: false,
-      restaurants: otherModelList,
+      deleteList: [],
+      restaurants: subModelList,
       selectedItem: {},
       option: {
         title: {
@@ -82,35 +85,33 @@ export default {
         animationEasingUpdate: "quinticInOut", // 好像没啥效果
         series: [
           {
+            type: "graph",
             markLine: {
-              data: [
-                // [
-                //   {x: "15%", y: "100%"},
-                //   {x: "15%", y: "0%"}
-                // ],
-                // [
-                //   {x: "30%", y: "100%"},
-                //   {x: "30%", y: "0%"}
-                // ],
-              ],
+              data: [],
+              symbol: "none",
+              symbolSize: 5,
+              silent: true,
+              lineStyle: {
+                width: 0.5,
+                opacity: 0.8
+              },
             },
-            type: "graph", // 坐标图
             layout: "none", // 'none' 不采用任何布局，使用节点中提供的 x， y 作为节点的位置。可选force和circular
             symbolSize: 50,
-            roam: true, // 鼠标滚轮缩放(sale) 和 拖动平移(move)，true表示都设置
+            roam: "none", // 鼠标滚轮缩放(sale) 和 拖动平移(move)，true表示都设置
             label: {
               show: true, // 节点标签是否展示
             },
             edgeSymbol: ["circle", "arrow"], // 连线两端的标记类型，[0]起始，[1]终止
             edgeSymbolSize: [5, 10], // 连线两端的标记大小
-            edgeLabel: {
-              fontSize: 15, // 连线关系标签字体的大小
-            },
+            // edgeLabel: {
+            //   fontSize: 15, // 连线关系标签字体的大小
+            // },
             data: [],
             links: [],
             lineStyle: {
-              opacity: 0.9,
-              width: 1,
+              opacity: 0.7,
+              width: 0.8,
             },
           },
         ],
@@ -119,6 +120,7 @@ export default {
   },
   methods: {
     deleteModel() {
+      this.deleteList = []
       this.deleteMode = true
       this.buttonVisible = false
       this.option.title.text = "删除模式(点击模型即可删除)"
@@ -127,48 +129,75 @@ export default {
       this.deleteMode = false
       this.buttonVisible = true
       this.option.title.text = "拓扑示例"
-
-      const h = this.$createElement;
-      this.$notify({
-        title: '提示',
-        message: h('i', { style: 'color: teal'}, '已保存'),
-        type: 'success'
-      });
+      var deleteMessage = ""
+      if (this.deleteList.length) {
+        for (const deletedItem of this.deleteList) {
+          deleteMessage = deleteMessage + deletedItem + "\n"
+        }
+        const h = this.$createElement;
+        this.$notify({
+          title: '已删除' + String(this.deleteList.length) +  '个模型',
+          message: h('i', { style: 'color: teal'}, deleteMessage),
+          type: 'success'
+        });
+      }
     },
-
     vChartClickEvent(e) {
       if (this.deleteMode) {
         for (const modelItem of modelList) {
           if (modelItem.value == e.data.name) {
+            this.deleteList.push(modelItem.value)
             var indexItem = modelList.indexOf(modelItem)
             var deletedModel = modelItem
             break
           }
         }
         modelList.splice(indexItem, 1)
-        console.log("deletedModel---,", deletedModel)
         this.restaurants.push(deletedModel)
         this.getBasicGraph()
       }
     },
 
-    addModel() {
-      modelList.push(this.selectedItem)
-      const h = this.$createElement;
-      this.$notify({
-        title: '提示',
-        message: h('i', { style: 'color: teal'}, '添加成功'),
-        type: 'success'
-      });
-      this.getBasicGraph()
+    addModelButtonEvent() {
+      if (this.input && this.selectedItem) {
+        if (subModelList.indexOf(this.selectedItem) != -1) {
+          for (const index in subModelList) {
+            if (subModelList[index] == this.selectedItem) {
+              subModelList.splice(index, 1)
+              modelList.push(this.selectedItem)
+              const h = this.$createElement;
+              this.$notify({
+                title: "已添加",
+                message: h('i', { style: 'color: teal'}, this.selectedItem.value),
+                type: 'success'
+              });
+              this.input = ""
+              this.selectedItem = ""
+              this.getBasicGraph()
+            }
+          }
+        } 
+        else {
+          const h = this.$createElement;
+          this.$notify({
+            title: "错误",
+            message: h('i', { style: 'color: teal'}, "未找到模型"),
+            type: 'error'
+          });
+        }
+      } 
+      else {
+        const h = this.$createElement;
+        this.$notify({
+          title: "提示",
+          message: h('i', { style: 'color: teal'}, "请选择模型"),
+          type: 'warning'
+        });
+      }
     },
-
     querySearch(queryString, cb) {
-      console.log("queryString---,", queryString)
       var restaurants = this.restaurants;
       var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants;
-      // console.log("restaurants---,", restaurants)
-      // console.log("results---,", results)
       // 调用 callback 返回建议列表的数据
       cb(results);
     },
@@ -178,13 +207,14 @@ export default {
       };
     },
     handleSelect(item) {
+      console.log("item---,", item)
       this.selectedItem = item
-      console.log("this.selectedItem------,", this.selectedItem);
+      this.input = item.value
     },
 
     getBasicGraph() {
       this.option.series[0].data = []
-      // console.log(edgeList);
+      this.option.series[0].markLine.data = []
       let columnInterval = 350,
         rowInterval = 200; // x, y坐标的interval
 
@@ -219,8 +249,68 @@ export default {
           levelJson[Object.keys(levelScaleList[j - 1])] +
           Object.values(levelScaleList[j]) * rowInterval;
       }
-      // console.log("classJson---,", classJson)
-      // console.log("levelJson----,", levelJson)
+
+      
+      var ClassCoord = columnInterval / 2;
+      var totalLevelCoord =  -rowInterval / 2;
+      // var totalLevelCoord = 0;
+      // 纵坐标区域虚线
+
+      // 计算y轴最高点
+      for (const levelScaleItem of levelScaleList) {
+        totalLevelCoord = totalLevelCoord + (Number(Object.values(levelScaleItem)) * rowInterval)
+      }
+      // 计算x轴各点
+      for (var classScaleItem of classScaleList) {
+        ClassCoord = ClassCoord + (Number(Object.values(classScaleItem)) * columnInterval)
+        var classDivideLine = [
+          {
+            name: Object.keys(classScaleItem)[0],
+            coord: [ClassCoord, totalLevelCoord],
+            label: {
+              position: "insideEndTop",
+              fontSize: 8,
+              color: "grey"
+            }
+
+          },
+          {
+            coord: [ClassCoord, -rowInterval/2]
+          },
+        ]
+        this.option.series[0].markLine.data.push(classDivideLine)
+      }
+      // this.option.series[0].markLine.data.pop()
+
+      var totalClassCoord = columnInterval / 2;
+      var levelCoord = - rowInterval / 2;
+      // 计算x轴最远点
+      for (var everyClassScaleItem of classScaleList) {
+        totalClassCoord = totalClassCoord + (Number(Object.values(everyClassScaleItem)) * columnInterval)
+      }
+      // 计算y轴各点
+      for (var everyLevelScaleItem of levelScaleList) {
+        levelCoord = levelCoord + (Number(Object.values(everyLevelScaleItem)) * rowInterval)
+        var levelDivideLine = [
+          {
+            name: Object.keys(everyLevelScaleItem)[0],
+            coord: [columnInterval/2, levelCoord],
+            lineStyle: {
+              color: "#FF3324"
+            },
+            label: {
+              position: "insideStartTop",
+              fontSize: 8,
+              color: "grey"
+            }
+          },
+          {
+            coord: [totalClassCoord, levelCoord]
+          },
+        ]
+        this.option.series[0].markLine.data.push(levelDivideLine)
+      }
+      // this.option.series[0].markLine.data.pop()
 
       // 以[(class+column) x level]初始化矩阵区域(area)
       var areaJson = {};
@@ -234,16 +324,15 @@ export default {
           }
         }
       }
-      // console.log("areaJson-------,", areaJson)
       let cmdbModel = [];
       for (const model of modelList) {
         // 模型(model)基础信息
         var json = {
           name: model.value,
           // symbol: "rect",  // (长)方形模块会导致连线错位，待解决
-          symbolSize: [45, 38],
+          symbolSize: [40, 35],
           label: {
-            fontSize: 9,
+            fontSize: 8.5,
           },
         };
         if (!model.column) {
