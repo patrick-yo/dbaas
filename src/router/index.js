@@ -1,6 +1,6 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Home from "../views/Home.vue";
+// import Home from "../views/Home.vue";
 
 Vue.use(VueRouter);
 
@@ -8,7 +8,21 @@ const routes = [
   {
     path: "/",
     name: "Home",
-    component: Home,
+    // component: Home,
+    component: resolve => require(['@/components/common/home.vue'], resolve),
+    children: [{
+      path: '/createdb',
+      component: resolve => require(['@/components/page/db/create/index.vue'], resolve),
+      meta: {
+        title: '创建数据库'
+      }
+    }, {
+      path: '/dashboard',
+      component: resolve => require(['@/components/page/dashboard/index.vue'], resolve),
+      meta: {
+        title: 'Dashboard'
+      }
+    }]
   },
   {
     path: "/about",

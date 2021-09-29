@@ -1,35 +1,48 @@
 <template>
   <div>
     <el-container>
-      <!-- <el-col :span="2"> -->
-      <el-col :span=2>
-        <div v-if="buttonVisible == true">
-          <el-button-group style="margin-top: 30px">
-              <el-button 
-              @click="drawer = true" 
-              size="small" 
-              type="primary" 
-              icon="el-icon-plus"
-              />
-              <el-button 
-              @click="deleteModel" 
-              size="small" 
-              type="info" 
-              icon="el-icon-delete"
-              />
-          </el-button-group>
-        </div>
-        <div v-else>
-          <el-button-group style="margin-top: 40px">
-            <el-button
-            @click="deleteSave"
-            size="small" 
-            type="primary"
-            icon="el-icon-check">保存</el-button>
-          </el-button-group>
-        </div>
+      <el-col :span="2">
+        <el-row :gutter="20">
+          <div v-if="buttonVisible == true">
+            <el-button-group style="margin-top: 30px">
+                <el-button 
+                @click="drawer = true" 
+                size="mini" 
+                type="primary" 
+                icon="el-icon-plus"
+                />
+                <el-button 
+                @click="deleteModelButton" 
+                size="mini" 
+                type="info" 
+                icon="el-icon-delete"
+                />
+            </el-button-group>
+          </div>
+          <div v-else>
+            <el-button-group style="margin-top: 40px">
+              <el-button
+              @click="deleteSaveButton"
+              size="mini" 
+              type="primary"
+              icon="el-icon-check">保存</el-button>
+            </el-button-group>
+          </div>
+        </el-row>
+        <el-row>
+          <el-button
+           @click="labelManagementButton"
+           size="mini"
+           type="info"
+           plain
+           style="margin-top: 50px">标签管理
+          </el-button>
+          <label-management-dialog
+            @dialogNotVisible="dialogNotVisible($event)"
+            :dialogVisible="dialogVisible">
+          </label-management-dialog>
+        </el-row>
       </el-col>
-      <!-- </el-col> -->
       <el-col>
         <v-chart class="chart" :option="option" :auto-resize="true" @click="vChartClickEvent" />
       </el-col>
@@ -51,7 +64,7 @@
           clearable />
         </el-col>
         <el-col :span="9">
-          <el-button @click="addModelButtonEvent" size="mini" type="warning">添加
+          <el-button @click="addModelButton" size="mini" type="warning">添加
           </el-button>
         </el-col>
       </el-row>
@@ -61,14 +74,17 @@
 
 <script>
 import VChart from "vue-echarts";
+import labelManagementDialog from "./labelManagerment"
 import { modelList, edgeList, subModelList } from "./model";
 
 export default {
   components: {
     VChart,
+    "label-management-dialog": labelManagementDialog
   },
   data() {
     return {
+      dialogVisible: false,
       buttonVisible: true,
       input: "",
       drawer: false,
@@ -119,13 +135,24 @@ export default {
     };
   },
   methods: {
-    deleteModel() {
+    dialogNotVisible(val) {
+      this.dialogVisible = val
+    },
+
+    labelManagementButton() {
+      this.dialogVisible = true
+    },
+
+
+    // 删除模式按钮
+    deleteModelButton() {
       this.deleteList = []
       this.deleteMode = true
       this.buttonVisible = false
       this.option.title.text = "删除模式(点击模型即可删除)"
     },
-    deleteSave() {
+    // 删除模式下的保存按钮
+    deleteSaveButton() {
       this.deleteMode = false
       this.buttonVisible = true
       this.option.title.text = "拓扑示例"
@@ -142,6 +169,7 @@ export default {
         });
       }
     },
+    // 点击模型事件
     vChartClickEvent(e) {
       if (this.deleteMode) {
         for (const modelItem of modelList) {
@@ -157,8 +185,8 @@ export default {
         this.getBasicGraph()
       }
     },
-
-    addModelButtonEvent() {
+    // 新增模型按钮
+    addModelButton() {
       if (this.input && this.selectedItem) {
         if (subModelList.indexOf(this.selectedItem) != -1) {
           for (const index in subModelList) {
@@ -176,7 +204,7 @@ export default {
               this.getBasicGraph()
             }
           }
-        } 
+        }
         else {
           const h = this.$createElement;
           this.$notify({
@@ -185,7 +213,7 @@ export default {
             type: 'error'
           });
         }
-      } 
+      }
       else {
         const h = this.$createElement;
         this.$notify({
@@ -195,23 +223,25 @@ export default {
         });
       }
     },
+    // 新增模型模式下，搜索查询的建议选项
     querySearch(queryString, cb) {
       var restaurants = this.restaurants;
       var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants;
       // 调用 callback 返回建议列表的数据
       cb(results);
     },
+    // 新增模型模式下，搜索查询的建议选项过滤
     createFilter(queryString) {
       return (restaurant) => {
         return (restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
       };
     },
+    // 新增模型模式下，点击建议选项
     handleSelect(item) {
-      console.log("item---,", item)
       this.selectedItem = item
       this.input = item.value
     },
-
+    // 主图
     getBasicGraph() {
       this.option.series[0].data = []
       this.option.series[0].markLine.data = []
@@ -221,7 +251,7 @@ export default {
       // 阶层(level) 与 种类(class) 定义
       var levelJson = { app: 0 },
         classJson = { infra: 0 };
-      // 种类(class)划分(横坐标比例) (直接定义为json无序，所以定义为数组对象)
+      // 种类(class)划分(横坐标比例) 
       var classScaleList = [
         { infra: 1 },
         { storage: 1 },
@@ -236,6 +266,7 @@ export default {
           classJson[Object.keys(classScaleList[i - 1])] +
           Object.values(classScaleList[i - 1]) * columnInterval;
       }
+      
       // 阶层(level)划分(纵坐标比例)
       var levelScaleList = [
         { app: 1 },
@@ -249,11 +280,12 @@ export default {
           levelJson[Object.keys(levelScaleList[j - 1])] +
           Object.values(levelScaleList[j]) * rowInterval;
       }
+      // console.log("classJson---,", classJson)
+      // console.log("levelJson---,", levelJson)
 
-      
+
       var ClassCoord = columnInterval / 2;
       var totalLevelCoord =  -rowInterval / 2;
-      // var totalLevelCoord = 0;
       // 纵坐标区域虚线
 
       // 计算y轴最高点
@@ -263,6 +295,7 @@ export default {
       // 计算x轴各点
       for (var classScaleItem of classScaleList) {
         ClassCoord = ClassCoord + (Number(Object.values(classScaleItem)) * columnInterval)
+        // console.log("ClassCoord----,", ClassCoord)
         var classDivideLine = [
           {
             name: Object.keys(classScaleItem)[0],
@@ -280,7 +313,7 @@ export default {
         ]
         this.option.series[0].markLine.data.push(classDivideLine)
       }
-      // this.option.series[0].markLine.data.pop()
+      // this.option.series[0].markLine.data.pop()  // 去掉最右边的虚线
 
       var totalClassCoord = columnInterval / 2;
       var levelCoord = - rowInterval / 2;
@@ -310,7 +343,7 @@ export default {
         ]
         this.option.series[0].markLine.data.push(levelDivideLine)
       }
-      // this.option.series[0].markLine.data.pop()
+      // this.option.series[0].markLine.data.pop() // 去掉最下面的虚线
 
       // 以[(class+column) x level]初始化矩阵区域(area)
       var areaJson = {};

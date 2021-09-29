@@ -1,6 +1,6 @@
-// level代表水平分层(physical/virtual/os/service/app)
-// class代表垂直分类(infra/storage/security/network/system/db/product)
-// column代表放在同class内的第n列，默认1
+// level: 水平分层(physical/virtual/os/service/app)
+// class: 垂直分类(infra/storage/security/network/system/db/product)
+// column: 放在同class内的第n列，默认1
 var modelList = [
   // system
   { value: "OS主机", level: "os", class: "system" },
@@ -40,8 +40,6 @@ var modelList = [
   // product
   { value: "制品", level: "app", class: "product" },
   { value: "项目信息", level: "service", class: "product"},
-
-
 ];
 
 const subModelList = [
